@@ -13,7 +13,7 @@ import_extra_data = pd.read_csv(r'extra_data.csv')
 csv_main_dataframe = pd.DataFrame(import_data)
 csv_extra_dataframe = pd.DataFrame(import_extra_data)
 
-country_stats = {'country name' : [], 'average possession': [], 'total goals': [], 'total passes': [], 'total shots': [], 'total shots on target': []}
+country_stats = {'country name' : [], 'country ranking': [], 'average possession': [], 'total goals': [], 'total passes': [], 'total shots': [], 'total shots on target': []}
 for i in csv_extra_dataframe.index:
     avg_possession = 0
     total_goals = 0
@@ -22,6 +22,7 @@ for i in csv_extra_dataframe.index:
     total_shots_on_target = 0
     game_count = 0
     team_name = csv_extra_dataframe['Country'][i]
+    country_stats['country ranking'].append(i+1)
 
     for j in csv_main_dataframe.index:
         first_team_name = csv_main_dataframe['team1'][j]
@@ -55,52 +56,52 @@ country_stats_dataframe = pd.DataFrame(country_stats)
 
 # ------------------------------------------------------------------------------------------
 # App Layout
+fig = px.bar(country_stats_dataframe, x='country ranking', y='country name', orientation='h')
+updated_figure = fig.update_layout(xaxis={'categoryorder': 'total ascending'})
+
 app.layout = html.Div([
 
     html.H1("World Cup 2022", style={'text-align': 'center'}),
 
-    dcc.Dropdown(id='slct_country', options=[
-        {'label': 'Argentina', 'value': 'ARGENTINA'},
-        {'label': 'France', 'value': 'FRANCE'},
-        {'label': 'Croatia', 'value': 'CROATIA'},
-        {'label': 'Morocco', 'value': 'MOROCCO'},
-        {'label': 'Netherlands', 'value': 'NETHERLANDS'},
-        {'label': 'England', 'value': 'ENGLAND'},
-        {'label': 'Brazil', 'value': 'BRAZIL'},
-        {'label': 'Portugal', 'value': 'PORTUGAL'},
-        {'label': 'Japan', 'value': 'JAPAN'},
-        {'label': 'Senegal', 'value': 'SENEGAL'},
-        {'label': 'Australia', 'value': 'AUSTRALIA'},
-        {'label': 'Switzerland', 'value': 'SWITZERLAND'},
-        {'label': 'Spain', 'value': 'SPAIN'},
-        {'label': 'USA', 'value': 'UNITED STATES'},
-        {'label': 'Poland', 'value': 'POLAND'},
-        {'label': 'South Korea', 'value': 'SOUTH KOREA'},
-        {'label': 'Germany', 'value': 'GERMANY'},
-        {'label': 'Ecuador', 'value': 'ECUADOR'},
-        {'label': 'Cameroon', 'value': 'CAMEROON'},
-        {'label': 'Uruguay', 'value': 'URUGUAY'},
-        {'label': 'Tunisia', 'value': 'TUNISIA'},
-        {'label': 'Mexico', 'value': 'MEXICO'},
-        {'label': 'Belgium', 'value': 'BELGIUM'},
-        {'label': 'Ghana', 'value': 'GHANA'},
-        {'label': 'Saudi Arabia', 'value': 'SAUDI ARABIA'},
-        {'label': 'Iran', 'value': 'IRAN'},
-        {'label': 'Costa Rica', 'value': 'COSTA RICA'},
-        {'label': 'Denmark', 'value': 'DENMARK'},
-        {'label': 'Serbia', 'value': 'SERBIA'},
-        {'label': 'Wales', 'value': 'WALES'},
-        {'label': 'Canada', 'value': 'CANADA'},
-        {'label': 'Qatar', 'value': 'QATAR'},
-    ])
+    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
+        {'label': 'average possession', 'value': 'average possession'},
+        {'label': 'total goals', 'value': 'total goals'},
+        {'label': 'total passes', 'value': 'total passes'},
+        {'label': 'total shots', 'value': 'total shots'},
+        {'label': 'shots on target', 'value': 'shots on target'}],
+        multi=False,
+        value='country ranking',
+        style={'width': "40%"}),
+
+    html.Div(id='output_container', children=[]),
+    html.Br(),
+
+    dcc.Graph(id='team_rankings', figure={})
 ])
-
-
-
 
 # ------------------------------------------------------------------------------------------
 # Connect Plotly Graph to Dash components
+@app.callback(
+    [Output(component_id='output_container', component_property='children'),
+     Output(component_id='team_rankings', component_property='figure')],
+    [Input(component_id='slct_stat', component_property='value')]
+)
+def update_graph(option_slctd):
+    print(option_slctd)
+    print(type(option_slctd))
 
-fig = px.bar(country_stats_dataframe, x='average possession', y='country name', orientation='h')
-fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
-fig.show()
+    container = "The year chosen by user was: {}".format(option_slctd)
+
+    df_copy = country_stats_dataframe.copy()
+    df_copy.sort_values(option_slctd)
+
+    print(df_copy)
+
+    # Plotly Express
+    fig = px.bar(df_copy, x=option_slctd, y='country name', orientation='h')
+    updated_figure = fig.update_layout(xaxis={'categoryorder': 'total ascending'})
+ 
+    return container, updated_figure
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
