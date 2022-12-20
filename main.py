@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import time
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, Input, Output, ctx
 
 app = Dash(__name__)
 
@@ -201,14 +201,29 @@ app.layout = html.Div([
             style={'maxHeight': '40'}, 
             config={'displayModeBar': False},
         ),
-        html.Button('Netherlands vs Argentina', style={'position': 'absolute', 'top': '70px', 'right': '100px', 'width': '85px'}),
-        html.Button('England vs France', style={'position': 'absolute', 'top': '398px', 'right': '100px', 'width': '85px'}),
-        html.Button('Croatia vs Brazil', style={'position': 'absolute', 'top': '179px', 'right': '100px', 'width': '85px'}),
-        html.Button('Morocco vs Portugal', style={'position': 'absolute', 'top': '290px', 'right': '100px', 'width': '85px'}),
-        html.Button('Argentina vs Croatia', style={'position': 'absolute', 'top': '125px', 'right': '210px', 'width': '85px'}),
-        html.Button('Morocco vs France', style={'position': 'absolute', 'top': '344px', 'right': '210px', 'width': '85px'}),
-        html.Button('Argentina vs France', style={'position': 'absolute', 'top': '234px', 'right': '320px', 'width': '85px'})
-        
+        # html.Button('Netherlands vs Argentina', id='button1', n_clicks=0, style={'position': 'absolute', 'top': '70px', 'right': '100px', 'width': '85px'}),
+        # html.Button('England vs France', id='button2', n_clicks=0, style={'position': 'absolute', 'top': '398px', 'right': '100px', 'width': '85px'}),
+        # html.Button('Croatia vs Brazil', id='button3', n_clicks=0, style={'position': 'absolute', 'top': '179px', 'right': '100px', 'width': '85px'}),
+        # html.Button('Morocco vs Portugal', id='button4', n_clicks=0, style={'position': 'absolute', 'top': '290px', 'right': '100px', 'width': '85px'}),
+        # html.Button('Argentina vs Croatia', id='button5', n_clicks=0 ,style={'position': 'absolute', 'top': '125px', 'right': '210px', 'width': '85px'}),
+        # html.Button('Morocco vs France', id='button6', n_clicks=0, style={'position': 'absolute', 'top': '344px', 'right': '210px', 'width': '85px'}),
+        # html.Button('Argentina vs France', id='button7', n_clicks=0, style={'position': 'absolute', 'top': '234px', 'right': '320px', 'width': '85px'}),
+
+        dcc.Dropdown(id='match_select', options=[{'label': 'Netherlands vs Argentina', 'value': 'Netherlands vs Argentina'},
+            {'label': 'England vs France', 'value': 'England vs France'},
+            {'label': 'Croatia vs Brazil', 'value': 'Croatia vs Brazil'},
+            {'label': 'Morocco vs Portugal', 'value': 'Morocco vs Portugal'},
+            {'label': 'Argentina vs Croatia', 'value': 'Argentina vs Croatia'},
+            {'label': 'Morocco vs France', 'value': 'Morocco vs France'},
+            {'label': 'Argentina vs France', 'value': 'Argentina vs France'},
+        ], value='Argentina vs France'),
+        dcc.Graph(
+            id='match_specific', 
+            figure={}, 
+            style={'maxHeight': '40'}, 
+            config={'displayModeBar': False},
+        ),
+
     
 ])
 
@@ -292,6 +307,237 @@ def update_team_average_graph(option):
     
     return fig1
 
+@app.callback(
+    Output(component_id='match_specific', component_property='figure'),
+    Input(component_id='match_select', component_property='value')
+)
+def displayClick(option):
+    if option == 'Netherlands vs Argentina': # Argentina Netherlands
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'Netherlands': [45, 2, 20],
+        'Argentina': [44, 2, 30]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Netherlands']
+        team_values = comparison_dictionary['Argentina']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Netherlands'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='Argentina'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+
+    elif option == 'England vs France': # England France
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'England': [54, 1, 14],
+        'France': [36, 2, 11]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['England']
+        team_values = comparison_dictionary['France']
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='England'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='France'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+    elif option == 'Croatia vs Brazil': # Croatia Brazil
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'Croatia': [45, 1, 27],
+        'Brazil': [45, 1, 25]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Croatia']
+        team_values = comparison_dictionary['Brazil']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Croatia'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='Brazil'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+    elif option == 'Morocco vs Portugal': # Morocco Portugal
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'Morocco': [22, 1, 11],
+        'Portugal': [65, 0, 17]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Morocco']
+        team_values = comparison_dictionary['Portugal']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Morocco'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='Portugal'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+    elif option == 'Argentina vs Croatia': # Argentina Croatia
+        msg = "Button 3 was most recently clicked"
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'Argentina': [34, 3, 6],
+        'Croatia': [54, 0, 16]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Argentina']
+        team_values = comparison_dictionary['Croatia']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Argentina'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='Croatia'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+    elif option == 'Morocco vs France': # Morocco France
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'France': [34, 2, 13],
+        'Morocco': [55, 0, 15]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Morocco']
+        team_values = comparison_dictionary['France']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Morocco'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='France'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+
+    elif option == 'Argentina vs France': # Argentina France
+        comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals',
+            'average free kicks'],
+        'Argentina': [46, 3, 22],
+        'France': [40, 3, 28]
+        }
+
+        stat_names = comparison_dictionary['stat name']
+        average_values = comparison_dictionary['Argentina']
+        team_values = comparison_dictionary['France']
+
+        fig1 = go.Figure()
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=average_values,
+            name='Argentina'
+        ))
+        fig1.add_trace(go.Bar(
+            x=stat_names,
+            y=team_values,
+            name='France'
+        ))
+        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        width=500,
+        height=500,
+        )
+        
+        return fig1
+    
+    return None
 
 if __name__ == '__main__':
     app.run_server(debug=True)
