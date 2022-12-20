@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import time
 from dash import Dash, dcc, html, Input, Output
 
 app = Dash(__name__)
@@ -131,13 +132,13 @@ image_path = 'assets/istockphoto-1176781177-612x612.jpg'
 # ------------------------------------------------------------------------------------------
 # App Layout
 app.layout = html.Div([
+    
     dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
         {'label': 'average possession', 'value': 'average possession'},
         {'label': 'total goals', 'value': 'total goals'},
         {'label': 'total passes', 'value': 'total passes'},
         {'label': 'total shots', 'value': 'total shots'},
         {'label': 'total shots on target', 'value': 'total shots on target'}],
-        multi=False,
         value='country ranking',
         style={'width': "40%", 'height': '100%', 'margin-left': '4%'},
         ),
@@ -155,8 +156,10 @@ app.layout = html.Div([
         )
     ], style={'display': 'flex'}),
 
-    html.Div([
-        dcc.Dropdown(id='slct_country', options=[{'label': 'Argentina', 'value': 'ARGENTINA'},
+    html.Br(),
+
+    dcc.Dropdown(id='slct_country', options=[
+        {'label': 'Argentina', 'value': 'ARGENTINA'},
         {'label': 'France', 'value': 'FRANCE'},
         {'label': 'Croatia', 'value': 'CROATIA'},
         {'label': 'Morocco', 'value': 'MOROCCO'},
@@ -188,17 +191,25 @@ app.layout = html.Div([
         {'label': 'Wales', 'value': 'WALES'},
         {'label': 'Canada', 'value': 'CANADA'},
         {'label': 'Qatar', 'value': 'QATAR'}],
-        multi=False,
         value='ARGENTINA',
-        style={'width': "40%", 'height': '100%', 'margin-left': '4%'},
+        style={'width': "40%", 'height': '40%', 'margin-left': '4%'},
         ),
 
         dcc.Graph(
             id='team_vs_average', 
             figure={}, 
-            style={'maxHeight': '40', 'display': 'inline-block', 'overflowY': 'scroll'}, 
+            style={'maxHeight': '40'}, 
             config={'displayModeBar': False},
-        )]),
+        ),
+        html.Button('Netherlands vs Argentina', style={'position': 'absolute', 'top': '70px', 'right': '100px', 'width': '85px'}),
+        html.Button('England vs France', style={'position': 'absolute', 'top': '398px', 'right': '100px', 'width': '85px'}),
+        html.Button('Croatia vs Brazil', style={'position': 'absolute', 'top': '179px', 'right': '100px', 'width': '85px'}),
+        html.Button('Morocco vs Portugal', style={'position': 'absolute', 'top': '290px', 'right': '100px', 'width': '85px'}),
+        html.Button('Argentina vs Croatia', style={'position': 'absolute', 'top': '125px', 'right': '210px', 'width': '85px'}),
+        html.Button('Morocco vs France', style={'position': 'absolute', 'top': '344px', 'right': '210px', 'width': '85px'}),
+        html.Button('Argentina vs France', style={'position': 'absolute', 'top': '234px', 'right': '320px', 'width': '85px'})
+        
+    
 ])
 
 # ------------------------------------------------------------------------------------------
@@ -228,7 +239,7 @@ def update_ranking_graph(option_slctd):
 )
 def update_team_average_graph(option):
     df_country_copy = country_stats_dataframe.copy()
-    df_country_copy = df_country_copy.loc[df_country_copy['country name'] == option]
+    list_for_country = df_country_copy.index[df_country_copy['country name']==option].tolist()
     comparison_dictionary = {
         'stat name': 
             ['average possession', 
@@ -248,20 +259,20 @@ def update_team_average_graph(option):
             average_stats['total avg fouls'],
             average_stats['total avg yellow cards'],
             average_stats['total avg red cards']],
-        'team_values': 
-            [df_country_copy.loc[0].at['average possession'],
-            df_country_copy.loc[0].at['country avg goals'],
-            df_country_copy.loc[0].at['country avg shots on target'],
-            df_country_copy.loc[0].at['country avg free kicks'],
-            df_country_copy.loc[0].at['country avg corners'],
-            df_country_copy.loc[0].at['country avg fouls'],
-            df_country_copy.loc[0].at['country avg yellow cards'],
-            df_country_copy.loc[0].at['country avg red cards']]
+        'team values': 
+            [df_country_copy.iloc[list_for_country]['average possession'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg goals'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg shots on target'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg free kicks'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg corners'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg fouls'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg yellow cards'].tolist()[0],
+            df_country_copy.iloc[list_for_country]['country avg red cards'].tolist()[0]]
         }
 
     stat_names = comparison_dictionary['stat name']
     average_values = comparison_dictionary['average values']
-    team_values = comparison_dictionary['team_values']
+    team_values = comparison_dictionary['team values']
 
     fig1 = go.Figure()
     fig1.add_trace(go.Bar(
@@ -276,8 +287,10 @@ def update_team_average_graph(option):
     ))
     fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
     width=500,
-    height=500)
-    fig1.show()
+    height=500,
+    )
+    
+    return fig1
 
 
 if __name__ == '__main__':
