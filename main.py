@@ -57,10 +57,7 @@ country_stats_dataframe = pd.DataFrame(country_stats)
 # ------------------------------------------------------------------------------------------
 # App Layout
 app.layout = html.Div([
-
-    html.H1("World Cup 2022", style={'text-align': 'center'}),
-
-    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'coountry ranking'},
+    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
         {'label': 'average possession', 'value': 'average possession'},
         {'label': 'total goals', 'value': 'total goals'},
         {'label': 'total passes', 'value': 'total passes'},
@@ -68,11 +65,12 @@ app.layout = html.Div([
         {'label': 'total shots on target', 'value': 'total shots on target'}],
         multi=False,
         value='country ranking',
-        style={'width': "40%", 'height': '100%'}),
+        style={'width': "40%", 'height': '100%'},
+        ),
 
-    html.Br(),
-
-    dcc.Graph(id='team_rankings', figure={}, style={'width': "40%", 'height': '100%'})
+    dcc.Graph(id='team_rankings', figure={}, style={'width': "40%", 'height': '100%'}, config={
+        'displayModeBar': False
+        }),
 ])
 
 # ------------------------------------------------------------------------------------------
@@ -90,7 +88,7 @@ def update_graph(option_slctd):
 
     # Plotly Express
     fig = px.bar(df_copy, x=option_slctd, y='country name', orientation='h')
-    fig.update_layout(barmode='stack', yaxis={'categoryorder': 'total ascending'})
+    fig.update_layout(barmode='stack', yaxis={'categoryorder': 'total ascending', 'tickmode': 'linear', 'tickfont': {'size': 9}}, margin_b=10, margin_t=10, margin_l=10, margin_r=10)
  
     return fig
 
