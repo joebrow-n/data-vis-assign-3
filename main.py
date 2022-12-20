@@ -56,52 +56,43 @@ country_stats_dataframe = pd.DataFrame(country_stats)
 
 # ------------------------------------------------------------------------------------------
 # App Layout
-fig = px.bar(country_stats_dataframe, x='country ranking', y='country name', orientation='h')
-updated_figure = fig.update_layout(xaxis={'categoryorder': 'total ascending'})
-
 app.layout = html.Div([
 
     html.H1("World Cup 2022", style={'text-align': 'center'}),
 
-    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
+    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'coountry ranking'},
         {'label': 'average possession', 'value': 'average possession'},
         {'label': 'total goals', 'value': 'total goals'},
         {'label': 'total passes', 'value': 'total passes'},
         {'label': 'total shots', 'value': 'total shots'},
-        {'label': 'shots on target', 'value': 'shots on target'}],
+        {'label': 'total shots on target', 'value': 'total shots on target'}],
         multi=False,
         value='country ranking',
-        style={'width': "40%"}),
+        style={'width': "40%", 'height': '100%'}),
 
-    html.Div(id='output_container', children=[]),
     html.Br(),
 
-    dcc.Graph(id='team_rankings', figure={})
+    dcc.Graph(id='team_rankings', figure={}, style={'width': "40%", 'height': '100%'})
 ])
 
 # ------------------------------------------------------------------------------------------
 # Connect Plotly Graph to Dash components
 @app.callback(
-    [Output(component_id='output_container', component_property='children'),
-     Output(component_id='team_rankings', component_property='figure')],
-    [Input(component_id='slct_stat', component_property='value')]
+    Output(component_id='team_rankings', component_property='figure'),
+    Input(component_id='slct_stat', component_property='value')
 )
 def update_graph(option_slctd):
-    print(option_slctd)
-    print(type(option_slctd))
-
-    container = "The year chosen by user was: {}".format(option_slctd)
 
     df_copy = country_stats_dataframe.copy()
-    df_copy.sort_values(option_slctd)
+    # df_copy = df_copy[df_copy["country name"] == option_slctd]
 
     print(df_copy)
 
     # Plotly Express
     fig = px.bar(df_copy, x=option_slctd, y='country name', orientation='h')
-    updated_figure = fig.update_layout(xaxis={'categoryorder': 'total ascending'})
+    fig.update_layout(barmode='stack', yaxis={'categoryorder': 'total ascending'})
  
-    return container, updated_figure
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
