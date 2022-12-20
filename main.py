@@ -54,6 +54,8 @@ for i in csv_extra_dataframe.index:
 
 country_stats_dataframe = pd.DataFrame(country_stats)
 
+image_path = 'assets/istockphoto-1176781177-612x612.jpg'
+
 # ------------------------------------------------------------------------------------------
 # App Layout
 app.layout = html.Div([
@@ -68,9 +70,13 @@ app.layout = html.Div([
         style={'width': "40%", 'height': '100%'},
         ),
 
-    dcc.Graph(id='team_rankings', figure={}, style={'width': "40%", 'height': '100%'}, config={
+    html.Div([dcc.Graph(id='team_rankings', figure={}, 
+    style={'maxHeight': '400px', 'display': 'inline-block', 'overflowY': 'scroll'}, 
+    config={
         'displayModeBar': False
-        }),
+        },
+    ),
+    html.Img(src=image_path, style={'display': 'inline-block'})], style={'display': 'flex'})
 ])
 
 # ------------------------------------------------------------------------------------------
@@ -80,17 +86,11 @@ app.layout = html.Div([
     Input(component_id='slct_stat', component_property='value')
 )
 def update_graph(option_slctd):
-
     df_copy = country_stats_dataframe.copy()
-    # df_copy = df_copy[df_copy["country name"] == option_slctd]
-
-    print(df_copy)
-
-    # Plotly Express
     fig = px.bar(df_copy, x=option_slctd, y='country name', orientation='h')
-    fig.update_layout(barmode='stack', yaxis={'categoryorder': 'total ascending', 'tickmode': 'linear', 'tickfont': {'size': 9}}, margin_b=10, margin_t=10, margin_l=10, margin_r=10)
- 
+    fig.update_layout(barmode='stack', height=700, yaxis={'categoryorder': 'total ascending', 'tickmode': 'linear', 'tickfont': {'size': 15}}, margin_b=10, margin_t=10, margin_l=10, margin_r=10)
     return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

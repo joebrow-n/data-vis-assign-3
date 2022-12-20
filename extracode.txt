@@ -30,3 +30,8 @@
         {'label': 'Wales', 'value': 'WALES'},
         {'label': 'Canada', 'value': 'CANADA'},
         {'label': 'Qatar', 'value': 'QATAR'}
+
+        html.Button('Button 1', style={'position': 'absolute', 'top': '50px', 'left': '50px'}),
+    html.Button('Button 2', style={'position': 'absolute', 'top': '50px', 'left': '100px'}),
+    html.Button('Button 3', style={'position': 'absolute', 'top': '100px', 'left': '50px'}),
+    html.Button('Button 4', style={'position': 'absolute', 'top': '100px', 'left': '100px'})
