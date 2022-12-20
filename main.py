@@ -155,7 +155,8 @@ app.layout = html.Div([
         )
     ], style={'display': 'flex'}),
 
-    dcc.Dropdown(id='slct_country', options=[{'label': 'Argentina', 'value': 'ARGENTINA'},
+    html.Div([
+        dcc.Dropdown(id='slct_country', options=[{'label': 'Argentina', 'value': 'ARGENTINA'},
         {'label': 'France', 'value': 'FRANCE'},
         {'label': 'Croatia', 'value': 'CROATIA'},
         {'label': 'Morocco', 'value': 'MOROCCO'},
@@ -188,16 +189,16 @@ app.layout = html.Div([
         {'label': 'Canada', 'value': 'CANADA'},
         {'label': 'Qatar', 'value': 'QATAR'}],
         multi=False,
-        value='country name',
+        value='ARGENTINA',
         style={'width': "40%", 'height': '100%', 'margin-left': '4%'},
         ),
 
         dcc.Graph(
             id='team_vs_average', 
             figure={}, 
-            style={'maxHeight': '400px', 'display': 'inline-block', 'overflowY': 'scroll'}, 
+            style={'maxHeight': '40', 'display': 'inline-block', 'overflowY': 'scroll'}, 
             config={'displayModeBar': False},
-        ),
+        )]),
 ])
 
 # ------------------------------------------------------------------------------------------
@@ -225,22 +226,58 @@ def update_ranking_graph(option_slctd):
     Output(component_id='team_vs_average', component_property='figure'),
     Input(component_id='slct_country', component_property='value')
 )
-def update_team_average_graph(option_slctd):
-    df_average_copy = average_stats_dataframe.copy()
+def update_team_average_graph(option):
     df_country_copy = country_stats_dataframe.copy()
-    df_country_copy = df_country_copy.loc[f'{option_slctd}']
-    fig = px.bar(df_average_copy, x=option_slctd, y='country name', orientation='h')
-    fig.update_layout(
-        barmode='stack', 
-        plot_bgcolor='#fff',
-        height=700, 
-        yaxis={'categoryorder': 'total ascending', 'tickmode': 'linear', 'tickfont': {'size': 15}}, 
-        margin_b=10, 
-        margin_t=10, 
-        margin_l=10, 
-        margin_r=10
-    )
-    return fig
+    df_country_copy = df_country_copy.loc[df_country_copy['country name'] == option]
+    comparison_dictionary = {
+        'stat name': 
+            ['average possession', 
+            'average goals', 
+            'average shots on target', 
+            'average free kicks', 
+            'average corners', 
+            'average fouls', 
+            'average yellow cards', 
+            'average red cards'],
+        'average values': 
+            [average_stats['total avg possession'], 
+            average_stats['total avg goals'], 
+            average_stats['total avg shots on target'], 
+            average_stats['total avg free kicks'], 
+            average_stats['total avg corners'],
+            average_stats['total avg fouls'],
+            average_stats['total avg yellow cards'],
+            average_stats['total avg red cards']],
+        'team_values': 
+            [df_country_copy.loc[0].at['average possession'],
+            df_country_copy.loc[0].at['country avg goals'],
+            df_country_copy.loc[0].at['country avg shots on target'],
+            df_country_copy.loc[0].at['country avg free kicks'],
+            df_country_copy.loc[0].at['country avg corners'],
+            df_country_copy.loc[0].at['country avg fouls'],
+            df_country_copy.loc[0].at['country avg yellow cards'],
+            df_country_copy.loc[0].at['country avg red cards']]
+        }
+
+    stat_names = comparison_dictionary['stat name']
+    average_values = comparison_dictionary['average values']
+    team_values = comparison_dictionary['team_values']
+
+    fig1 = go.Figure()
+    fig1.add_trace(go.Bar(
+        x=stat_names,
+        y=average_values,
+        name='Average values'
+    ))
+    fig1.add_trace(go.Bar(
+        x=stat_names,
+        y=team_values,
+        name='Team values'
+    ))
+    fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+    width=500,
+    height=500)
+    fig1.show()
 
 
 if __name__ == '__main__':
