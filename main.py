@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import time
+import statsmodels
 from dash import Dash, dcc, html, Input, Output, ctx
 
 app = Dash(__name__)
@@ -133,31 +133,16 @@ image_path = 'assets/istockphoto-1176781177-612x612.jpg'
 # App Layout
 app.layout = html.Div([
     
-    dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
+    html.Div([dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
         {'label': 'average possession', 'value': 'average possession'},
         {'label': 'total goals', 'value': 'total goals'},
         {'label': 'total passes', 'value': 'total passes'},
         {'label': 'total shots', 'value': 'total shots'},
         {'label': 'total shots on target', 'value': 'total shots on target'}],
         value='country ranking',
-        style={'width': "40%", 'height': '100%', 'margin-left': '4%'},
+        style={'width': "60%", 'height': '100%', 'margin-left': '4%', 'display': 'inline-block'},
         ),
-
-    html.Div([
-        dcc.Graph(
-            id='team_rankings', 
-            figure={}, 
-            style={'maxHeight': '400px', 'display': 'inline-block', 'overflowY': 'scroll'}, 
-            config={'displayModeBar': False},
-        ),
-        html.Img(
-            src=image_path, 
-            style={'display': 'inline-block', 'margin-right': '20px', 'margin-left': '4%'}
-        )
-    ], style={'display': 'flex'}),
-
-    html.Br(),
-
+    
     dcc.Dropdown(id='slct_country', options=[
         {'label': 'Argentina', 'value': 'ARGENTINA'},
         {'label': 'France', 'value': 'FRANCE'},
@@ -192,39 +177,70 @@ app.layout = html.Div([
         {'label': 'Canada', 'value': 'CANADA'},
         {'label': 'Qatar', 'value': 'QATAR'}],
         value='ARGENTINA',
-        style={'width': "40%", 'height': '40%', 'margin-left': '4%'},
+        style={'width': "60%", 'height': '20%', 'margin-right': '20%', 'display': 'inline-block'},
         ),
+    ], style={'display': 'flex'}),
 
+    html.Br(),
+
+    html.Div([
+        dcc.Graph(
+            id='team_rankings', 
+            figure={}, 
+            style={'maxHeight': '400px', 'display': 'inline-block', 'overflowY': 'scroll'}, 
+            config={'displayModeBar': False},
+        ),
         dcc.Graph(
             id='team_vs_average', 
             figure={}, 
-            style={'maxHeight': '40'}, 
+            style={'maxHeight': '40', 'display': 'inline-block'}, 
             config={'displayModeBar': False},
         ),
-        # html.Button('Netherlands vs Argentina', id='button1', n_clicks=0, style={'position': 'absolute', 'top': '70px', 'right': '100px', 'width': '85px'}),
-        # html.Button('England vs France', id='button2', n_clicks=0, style={'position': 'absolute', 'top': '398px', 'right': '100px', 'width': '85px'}),
-        # html.Button('Croatia vs Brazil', id='button3', n_clicks=0, style={'position': 'absolute', 'top': '179px', 'right': '100px', 'width': '85px'}),
-        # html.Button('Morocco vs Portugal', id='button4', n_clicks=0, style={'position': 'absolute', 'top': '290px', 'right': '100px', 'width': '85px'}),
-        # html.Button('Argentina vs Croatia', id='button5', n_clicks=0 ,style={'position': 'absolute', 'top': '125px', 'right': '210px', 'width': '85px'}),
-        # html.Button('Morocco vs France', id='button6', n_clicks=0, style={'position': 'absolute', 'top': '344px', 'right': '210px', 'width': '85px'}),
-        # html.Button('Argentina vs France', id='button7', n_clicks=0, style={'position': 'absolute', 'top': '234px', 'right': '320px', 'width': '85px'}),
+    ], style={'display': 'flex'}),
 
-        dcc.Dropdown(id='match_select', options=[{'label': 'Netherlands vs Argentina', 'value': 'Netherlands vs Argentina'},
+    html.Br(),
+
+    html.Div([
+        dcc.Dropdown(id='match_select', options=[
+            {'label': 'Netherlands vs Argentina', 'value': 'Netherlands vs Argentina'},
             {'label': 'England vs France', 'value': 'England vs France'},
             {'label': 'Croatia vs Brazil', 'value': 'Croatia vs Brazil'},
             {'label': 'Morocco vs Portugal', 'value': 'Morocco vs Portugal'},
             {'label': 'Argentina vs Croatia', 'value': 'Argentina vs Croatia'},
             {'label': 'Morocco vs France', 'value': 'Morocco vs France'},
             {'label': 'Argentina vs France', 'value': 'Argentina vs France'},
-        ], value='Argentina vs France'),
+            ], 
+            value='Argentina vs France',
+            style={'width': "60%", 'height': '100%', 'margin-left': '4%', 'display': 'inline-block'}
+        ),
+        dcc.Dropdown(id='metric_select', options=[
+            {'label': 'average goals per match', 'value': 'country avg goals'},
+            {'label': 'average possession', 'value': 'average possession'},
+            {'label': 'average passes per match', 'value': 'country avg passes'},
+            {'label': 'average shots on target per match', 'value': 'country avg shots on target'},
+            {'label': 'average corners per match', 'value': 'country avg corners'},
+            {'label': 'average fouls per match', 'value': 'country avg fouls'},
+            {'label': 'average yellow cards per match', 'value': 'country avg yellow cards'}
+            ], 
+            value='country avg goals',
+            style={'width': "60%", 'height': '20%', 'margin-right': '40%', 'display': 'inline-block'}
+        ),
+    ], style={'display': 'flex'}),
+
+    html.Div([
         dcc.Graph(
             id='match_specific', 
             figure={}, 
-            style={'maxHeight': '40'}, 
+            style={'maxHeight': '40', 'display': 'inline-block'}, 
             config={'displayModeBar': False},
-        ),
-
-    
+        ), 
+        dcc.Graph(
+            id='ranking_vs_metric', 
+            figure={}, 
+            style={'maxHeight': '40', 'display': 'inline-block'}, 
+            config={'displayModeBar': False},
+        )
+    ], style={'display': 'flex'})
 ])
 
 # ------------------------------------------------------------------------------------------
@@ -536,8 +552,19 @@ def displayClick(option):
         )
         
         return fig1
-    
     return None
+
+@app.callback(
+    Output(component_id='ranking_vs_metric', component_property='figure'),
+    Input(component_id='metric_select', component_property='value')
+)
+def update_metric_metric(metric_option):
+    df_country_stats_copy = country_stats_dataframe.copy()
+    metric_fig = px.scatter(df_country_stats_copy, x='country ranking', y=metric_option, trendline='ols')
+    metric_fig.update_traces(mode = 'lines')
+    metric_fig.update_layout(autosize=False, width=500, height=500,)
+    return metric_fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

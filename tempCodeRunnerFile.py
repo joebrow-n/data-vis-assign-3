@@ -1,3 +1,1 @@
-
-
-def update_t
+'margin-right': '50%'
