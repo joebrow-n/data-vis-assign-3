@@ -3,6 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import statsmodels
 from dash import Dash, dcc, html, Input, Output, ctx
+import webbrowser
+from threading import Timer
 
 app = Dash(__name__)
 
@@ -127,11 +129,10 @@ average_stats['total avg fouls'] = average_stats['total avg fouls']/32
 
 country_stats_dataframe = pd.DataFrame(country_stats)
 
-image_path = 'assets/istockphoto-1176781177-612x612.jpg'
-
 # ------------------------------------------------------------------------------------------
 # App Layout
 app.layout = html.Div([
+    html.H1('Qatar World Cup 2022', style={'textAlign': 'center', "font-family":"verdana"}),
     
     html.Div([dcc.Dropdown(id='slct_stat', options=[{'label': 'ranking', 'value': 'country ranking'},
         {'label': 'average possession', 'value': 'average possession'},
@@ -140,7 +141,7 @@ app.layout = html.Div([
         {'label': 'total shots', 'value': 'total shots'},
         {'label': 'total shots on target', 'value': 'total shots on target'}],
         value='country ranking',
-        style={'width': "60%", 'height': '100%', 'margin-left': '4%', 'display': 'inline-block'},
+        style={'width': "60%", 'height': '100%', 'margin-left': '3%', 'display': 'inline-block'},
         ),
     
     dcc.Dropdown(id='slct_country', options=[
@@ -177,10 +178,11 @@ app.layout = html.Div([
         {'label': 'Canada', 'value': 'CANADA'},
         {'label': 'Qatar', 'value': 'QATAR'}],
         value='ARGENTINA',
-        style={'width': "60%", 'height': '20%', 'margin-right': '20%', 'display': 'inline-block'},
+        style={'width': "60%", 'height': '20%', 'margin-left': '1%', 'display': 'inline-block'},
         ),
     ], style={'display': 'flex'}),
 
+    html.Br(),
     html.Br(),
 
     html.Div([
@@ -211,7 +213,7 @@ app.layout = html.Div([
             {'label': 'Argentina vs France', 'value': 'Argentina vs France'},
             ], 
             value='Argentina vs France',
-            style={'width': "60%", 'height': '100%', 'margin-left': '4%', 'display': 'inline-block'}
+            style={'width': "60%", 'height': '100%', 'margin-left': '3%', 'display': 'inline-block'}
         ),
         dcc.Dropdown(id='metric_select', options=[
             {'label': 'average goals per match', 'value': 'country avg goals'},
@@ -223,7 +225,7 @@ app.layout = html.Div([
             {'label': 'average yellow cards per match', 'value': 'country avg yellow cards'}
             ], 
             value='country avg goals',
-            style={'width': "60%", 'height': '20%', 'margin-right': '40%', 'display': 'inline-block'}
+            style={'width': "60%", 'height': '20%', 'margin-left': '1%', 'display': 'inline-block'}
         ),
     ], style={'display': 'flex'}),
 
@@ -237,7 +239,7 @@ app.layout = html.Div([
         dcc.Graph(
             id='ranking_vs_metric', 
             figure={}, 
-            style={'maxHeight': '40', 'display': 'inline-block'}, 
+            style={'maxHeight': '40', 'display': 'inline-block', 'margin-left': '15%'}, 
             config={'displayModeBar': False},
         )
     ], style={'display': 'flex'})
@@ -251,16 +253,18 @@ app.layout = html.Div([
 )
 def update_ranking_graph(option_slctd):
     df_copy = country_stats_dataframe.copy()
-    fig = px.bar(df_copy, x=option_slctd, y='country name', orientation='h')
+    fig = px.bar(df_copy, x=option_slctd, y='country name', title='Country Ranking', orientation='h')
     fig.update_layout(
         barmode='stack', 
         plot_bgcolor='#fff',
         height=700, 
         yaxis={'categoryorder': 'total ascending', 'tickmode': 'linear', 'tickfont': {'size': 15}}, 
         margin_b=10, 
-        margin_t=10, 
+        margin_t=30, 
         margin_l=10, 
-        margin_r=10
+        margin_r=10,
+        xaxis_title=None,
+        yaxis_title=None
     )
     return fig
 
@@ -316,9 +320,10 @@ def update_team_average_graph(option):
         y=team_values,
         name='Team values'
     ))
-    fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+    fig1.update_layout(title='Team stats vs. Average stats', xaxis_title=None, yaxis_title=None, autosize=False,
     width=500,
     height=500,
+    plot_bgcolor='#fff'
     )
     
     return fig1
@@ -331,9 +336,9 @@ def displayClick(option):
     if option == 'Netherlands vs Argentina': # Argentina Netherlands
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'Netherlands': [45, 2, 20],
         'Argentina': [44, 2, 30]
         }
@@ -353,20 +358,21 @@ def displayClick(option):
             y=team_values,
             name='Argentina'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
 
 
-    elif option == 'England vs France': # England France
+    elif option == 'England vs France': # England        
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'England': [54, 1, 14],
         'France': [36, 2, 11]
         }
@@ -385,9 +391,10 @@ def displayClick(option):
             y=team_values,
             name='France'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -395,9 +402,9 @@ def displayClick(option):
     elif option == 'Croatia vs Brazil': # Croatia Brazil
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'Croatia': [45, 1, 27],
         'Brazil': [45, 1, 25]
         }
@@ -417,9 +424,10 @@ def displayClick(option):
             y=team_values,
             name='Brazil'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -427,9 +435,9 @@ def displayClick(option):
     elif option == 'Morocco vs Portugal': # Morocco Portugal
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'Morocco': [22, 1, 11],
         'Portugal': [65, 0, 17]
         }
@@ -449,9 +457,10 @@ def displayClick(option):
             y=team_values,
             name='Portugal'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -460,9 +469,9 @@ def displayClick(option):
         msg = "Button 3 was most recently clicked"
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'Argentina': [34, 3, 6],
         'Croatia': [54, 0, 16]
         }
@@ -482,9 +491,10 @@ def displayClick(option):
             y=team_values,
             name='Croatia'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -492,9 +502,9 @@ def displayClick(option):
     elif option == 'Morocco vs France': # Morocco France
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'France': [34, 2, 13],
         'Morocco': [55, 0, 15]
         }
@@ -514,9 +524,10 @@ def displayClick(option):
             y=team_values,
             name='France'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -524,9 +535,9 @@ def displayClick(option):
     elif option == 'Argentina vs France': # Argentina France
         comparison_dictionary = {
         'stat name': 
-            ['average possession', 
-            'average goals',
-            'average free kicks'],
+            ['possession', 
+            'goals',
+            'free kicks'],
         'Argentina': [46, 3, 22],
         'France': [40, 3, 28]
         }
@@ -546,9 +557,10 @@ def displayClick(option):
             y=team_values,
             name='France'
         ))
-        fig1.update_layout(title='Grouped bar chart', xaxis_title='Stat name', yaxis_title='Value', autosize=False,
+        fig1.update_layout(title='Match Statistics - knockout stages', xaxis_title=None, yaxis_title=None, autosize=False,
         width=500,
         height=500,
+        plot_bgcolor='#fff'
         )
         
         return fig1
@@ -560,11 +572,16 @@ def displayClick(option):
 )
 def update_metric_metric(metric_option):
     df_country_stats_copy = country_stats_dataframe.copy()
-    metric_fig = px.scatter(df_country_stats_copy, x='country ranking', y=metric_option, trendline='ols')
+    metric_fig = px.scatter(df_country_stats_copy, x='country ranking', y=metric_option, trendline='ols', title='metric vs ranking')
     metric_fig.update_traces(mode = 'lines')
     metric_fig.update_layout(autosize=False, width=500, height=500,)
     return metric_fig
 
+port = 8050 # or simply open on the default `8050` port
+
+def open_browser():
+	webbrowser.open_new("http://localhost:{}".format(port))
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    Timer(1, open_browser).start(); # "open_browser" is the function that refers to a set of commands to let Selenium open a browser.
+    app.run_server(debug=False, port=port)
